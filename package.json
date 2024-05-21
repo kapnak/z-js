@@ -1,0 +1,15 @@
+{
+  "name": "z-js",
+  "version": "1.0.0",
+  "description": "Bundle of javascript libraries for Z ecosystem.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "kapnak",
+  "license": "ISC",
+  "dependencies": {
+    "zprotocol-js": "github:kapnak/zprotocol-js",
+    "zrfs-js": "github:kapnak/zrfs-js"
+  }
+}
