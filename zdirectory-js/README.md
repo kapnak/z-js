@@ -30,7 +30,7 @@ const zdirectory = require('zdirectory-js');
 
 ## Documentation
 
-### `function connect(host, port, pk, options)`
+### `function connect(host, port, pk, options={})`
 
 Return a `Directory` object.
 If `options.connect` is not changed to `true` this function will connect / disconnect
