@@ -19,10 +19,10 @@ const zdirectory = require('zdirectory-js');
     let kp = zprotocol.generate_kp();   // Generate a kp for the purpose of the example.
     
     // Register an address
-    dir.register('203.0.113.0:1234', kp);
+    await dir.register('203.0.113.0:1234', kp);
     
     // Ask for an address
-    let address = dir.ask(kp.pk);
+    let address = await dir.ask(kp.pk);
     
     console.log(address);       // 203.0.113.0:1234
 })();
@@ -30,7 +30,7 @@ const zdirectory = require('zdirectory-js');
 
 ## Documentation
 
-### `function connect(host, port, pk, options)`
+### `function connect(host, port, pk, options={})`
 
 Return a `Directory` object.
 If `options.connect` is not changed to `true` this function will connect / disconnect
