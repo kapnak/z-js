@@ -1,5 +1,5 @@
 const Directory = require('./Directory');
-
+const LocalDirectory = require('./LocalDirectory');
 
 /**
  * Return a `Directory` object.
@@ -15,7 +15,7 @@ const Directory = require('./Directory');
  * key pair used to connect to the directory.
  * @return {Promise<Directory>|Directory} - A promise or directly the Directory if the `options.connect` is `false`.
  */
-function connect(host, port, pk, options) {
+function connect(host, port, pk, options={}) {
     if (!options.connect)
         return new Directory(host, port, pk, () => {}, options);
     return new Promise((resolve) => {
@@ -24,7 +24,23 @@ function connect(host, port, pk, options) {
 }
 
 
+/**
+ * Host a ZDirectory server.
+ * @param {string|{pk: Uint8Array<32>, sk: Uint8Array<64>}} kp - The server key pair or the path to it.
+ * @param {{
+ *     [host='0.0.0.0']: string,
+ *     [port=1501]: number
+ * }} options
+ * @return {Promise<LocalDirectory>}
+ */
+async function host(kp, options={}) {
+    return LocalDirectory.host(kp, options);
+}
+
+
 module.exports = {
     connect,
-    Directory
-}
+    host,
+    Directory,
+    LocalDirectory
+};

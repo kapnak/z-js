@@ -50,7 +50,7 @@ module.exports = class Directory {
      */
     async register(address, local_kp=this.kp, timeout=5) {
         let server = await this._getConnection(local_kp);
-        let buf = Buffer.alloc(2 + address.length);
+        let buf = Buffer.alloc(1 + address.length);
         buf.write(address, 1)
         let reply = await server.request(buf, timeout);
         server.disconnect();
