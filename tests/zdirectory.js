@@ -1,17 +1,16 @@
-const zprotocol = require('zprotocol-js')
-const {connect, host} = require('../src/index');
+const z = require('..');
 
 const address = '192.168.1.1:9999';
 
 (async () => {
-    await zprotocol.ready;
+    await z.ready;
 
-    const kp1 = zprotocol.generate_kp();
-    const kp2 = zprotocol.generate_kp();
+    const kp1 = z.generate_kp();
+    const kp2 = z.generate_kp();
 
-    await host(kp1, {host: '127.0.0.1'});
+    await z.directory.host(kp1, {host: '127.0.0.1'});
 
-    const directory = await connect('127.0.0.1', 1501, kp1.pk, {});
+    const directory = await z.directory.connect('127.0.0.1', 1501, kp1.pk, {});
     await directory.register(address, kp2);
     const addressRetrieve = await directory.ask(kp2.pk);
 

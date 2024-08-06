@@ -1,7 +1,7 @@
-const zprotocol = require('zprotocol-js');
-const zrfs = require('zrfs-js');
-const zdirectory = require('./zdirectory-js');
-const {setOptions} = require('zrfs-js/src/utils');
+const zprotocol = require('./zprotocol');
+const zrfs = require('./zrfs');
+const zdirectory = require('./zdirectory');
+const {setOptions} = require('./zrfs/utils');
 
 
 let defaults = {

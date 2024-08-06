@@ -9,7 +9,8 @@
   "author": "kapnak",
   "license": "ISC",
   "dependencies": {
-    "zprotocol-js": "github:kapnak/zprotocol-js",
-    "zrfs-js": "github:kapnak/zrfs-js"
+    "async-mutex": "^0.5.0",
+    "libsodium-wrappers-sumo": "^0.7.14",
+    "rfc4648": "^1.5.3"
   }
 }

@@ -1,4 +1,4 @@
-const zprotocol = require('zprotocol-js');
+const zprotocol = require('../zprotocol');
 
 
 module.exports = class LocalDirectory {
