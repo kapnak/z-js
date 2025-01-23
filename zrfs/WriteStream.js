@@ -4,31 +4,40 @@ const {setOptions} = require('./utils');
 
 module.exports = class WriteStream extends Writable {
     constructor(file, options) {
-        super();
-        setOptions(options, {encoding: undefined, start: 0, end: Infinity, autoClose: true});
+        setOptions(options, {encoding: undefined, start: 0, autoClose: true});
+        super({autoDestroy: options.autoClose});
         this.file = file;
         this.start = options.start;
-        this.end = options.end;
-        this.pos = this.start;      // TODO : Remember by default pos is undefined in Node.js and not used when there is no options.start.
-        this.autoClose = options.autoClose;
+        this.pos = this.start;
+        this.bytesWritten = 0;
+        this._autoDestroy = options.autoClose;
         this.performingIO = false;
-        this.file.on('close', Function.prototype.bind(this.close, this));
-
-        if (!this.autoClose)
-            this.on('finish', this.destroy);
 
         if (options.encoding)
             this.setDefaultEncoding(options.encoding);
     }
 
+    get autoClose() {
+        return this._autoDestroy;
+    }
+
+    set autoClose(val) {
+        this._autoDestroy = val;
+    }
+
     _write(data, encoding, cb) {
         this.performingIO = true;
-        writeAll(data, data.length, this.pos).then(() => {
+        writeAll(this, data, data.length, this.pos).finally(() => {
             this.performingIO = false;
-            if (this.destroyed)
+            if (this.destroyed) {
+                cb();
                 return this.emit('readyToDestroy');
-            this.pos += data.length;
+            }
+            cb();
         });
+
+        if (this.pos !== undefined)
+            this.pos += data.length;
     }
 
     _destroy(error, cb) {
@@ -40,21 +49,38 @@ module.exports = class WriteStream extends Writable {
             this.file.close();
         }
     }
+
+    close(cb) {
+        if (cb) {
+            if (this.closed) {
+                process.nextTick(cb);
+                return;
+            }
+            this.on('close', cb);
+        }
+
+        if (!this.autoClose) {
+            this.on('finish', this.destroy);
+        }
+        this.end();
+    }
 }
 
 
-async function writeAll(data, size, pos, retries = 0) {
+async function writeAll(stream, data, size, pos, retries = 0) {
     let bytesWritten;
     try {
-        bytesWritten = await this.file.write(data, {position: this.pos, length: size});
+        bytesWritten = Number(await stream.file.write(data, {position: pos, length: size}));
     } catch (error) {
         if (error.code === 'EAGAIN') {
             bytesWritten = 0;
         }
     }
 
-    if (this.destroyed)
+    if (stream.destroyed)
         return new Error('Stream destroyed, can\'t write.');
+
+    stream.bytesWritten += bytesWritten;
 
     retries = bytesWritten ? 0 : retries + 1;
     size -= bytesWritten;
@@ -64,5 +90,5 @@ async function writeAll(data, size, pos, retries = 0) {
     if (retries > 5)
         return new Error('Write failed, max tries reach.');
     else if (size)
-        return writeAll.call(this, data.slice(bytesWritten), size, pos, retries);
+        return await writeAll(stream, data.slice(bytesWritten), size, pos, retries);
 }
