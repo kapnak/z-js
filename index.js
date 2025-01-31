@@ -127,6 +127,32 @@ function parseAddress(address) {
 }
 
 
+/**
+ * Read key pair from the given file on ZRFS.
+ * If the file doesn't exist, it will be generated with a new key pair.
+ * @param {RFS} rfs - The remote file system.
+ * @param {string} file - The file of the secret key (.sk).
+ * @param {boolean} [createFile=true] - If set to false and the file doesn't exist, it will throw an error.
+ * @return {Promise<{pk: Uint8Array, sk: Uint8Array}>}
+ */
+async function read_kp_rfs(rfs, file, createFile=true) {
+    try {
+        let sk = await rfs.readFile(file);
+        return {
+            'pk': global.sodium.crypto_sign_ed25519_sk_to_pk(sk),
+            'sk': Uint8Array.from(sk)
+        };
+    } catch (error) {
+        if (error.code === 'ENOENT' && createFile) {
+            let kp = zprotocol.generate_kp();
+            await rfs.writeFile(file, kp.sk);
+            return kp;
+        }
+        throw error;
+    }
+}
+
+
 module.exports = {
     ready,
     defaults,
@@ -141,6 +167,7 @@ module.exports = {
     read_kp: zprotocol.read_kp,
     bs32toBytes: zprotocol.bs32toBytes,
     bytesToBs32: zprotocol.bytesToBs32,
+    read_kp_rfs,
     joinAddress,
     parseAddress
 };
